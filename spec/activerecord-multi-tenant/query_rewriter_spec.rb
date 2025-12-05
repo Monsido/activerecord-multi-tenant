@@ -12,7 +12,7 @@ describe 'Query Rewriter' do
 
   context 'when bulk updating' do
     let!(:account) { Account.create!(name: 'Test Account') }
-    let!(:project) { Project.create(name: 'Project 1', account: account) }
+    let!(:project) { Project.create(name: 'Project 1', account: account, my_counter: 1) }
     let!(:manager) { Manager.create(name: 'Manager', project: project, account: account) }
 
     it 'updates the records' do
@@ -21,6 +21,16 @@ describe 'Query Rewriter' do
           Project.joins(:manager).update_all(name: 'New Name')
         end
       end.to change { project.reload.name }.from('Project 1').to('New Name')
+    end
+
+    it 'sergio repro' do
+      expect do
+        MultiTenant.with(account) do
+          project.increment!(:my_counter)
+          project.increment!(:my_counter)
+          project.decrement!(:my_counter)
+        end
+      end.to change { project.reload.my_counter }.from(1).to(2)
     end
 
     it 'updates the records without a current tenant' do

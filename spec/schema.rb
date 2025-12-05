@@ -15,6 +15,7 @@ ARGV.grep(/\w+_spec\.rb/).empty? && ActiveRecord::Schema.define(version: 1) do
   create_table :projects, force: true, partition_key: :account_id do |t|
     t.column :account_id, :integer
     t.column :name, :string
+    t.column :my_counter, :integer, null: false, default: 0
   end
 
   create_table :managers, force: true, partition_key: :account_id do |t|
