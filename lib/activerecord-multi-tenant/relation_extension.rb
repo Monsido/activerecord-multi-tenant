@@ -17,19 +17,19 @@ module Arel
     end
 
     # Overrides the update_all method to include tenant scoping
-    def update_all(updates)
-      model = MultiTenant.multi_tenant_model_for_table(table_name)
+    # def update_all(updates)
+    #   model = MultiTenant.multi_tenant_model_for_table(table_name)
 
-      # Call the original update_all method if the current tenant is identified by an ID
-      return super if model.nil? || MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
+    #   # Call the original update_all method if the current tenant is identified by an ID
+    #   return super if model.nil? || MultiTenant.current_tenant_is_id? || MultiTenant.current_tenant.nil?
 
-      stmt = Arel::UpdateManager.new
-      stmt.table(table)
-      stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates))
-      stmt.wheres = [generate_in_condition_subquery]
+    #   stmt = Arel::UpdateManager.new
+    #   stmt.table(table)
+    #   stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates))
+    #   stmt.wheres = [generate_in_condition_subquery]
 
-      klass.connection.update(stmt, "#{klass} Update All").tap { reset }
-    end
+    #   klass.connection.update(stmt, "#{klass} Update All").tap { reset }
+    # end
 
     private
 
