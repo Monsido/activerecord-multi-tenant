@@ -12,7 +12,7 @@ describe 'Query Rewriter' do
 
   context 'when bulk updating' do
     let!(:account) { Account.create!(name: 'Test Account') }
-    let!(:project) { Project.create(name: 'Project 1', account: account) }
+    let!(:project) { Project.create(name: 'Project 1', account: account, my_counter: 1) }
     let!(:manager) { Manager.create(name: 'Manager', project: project, account: account) }
 
     it 'updates the records' do
@@ -21,6 +21,16 @@ describe 'Query Rewriter' do
           Project.joins(:manager).update_all(name: 'New Name')
         end
       end.to change { project.reload.name }.from('Project 1').to('New Name')
+    end
+
+    it 'sergio repro' do
+      expect do
+        MultiTenant.with(account) do
+          project.increment!(:my_counter)
+          project.increment!(:my_counter)
+          project.decrement!(:my_counter)
+        end
+      end.to change { project.reload.my_counter }.from(1).to(2)
     end
 
     it 'updates the records without a current tenant' do
@@ -63,6 +73,9 @@ describe 'Query Rewriter' do
       @queries.each do |actual_query|
         next unless actual_query.include?('UPDATE "projects" SET "name"')
 
+        # Extract parameterized values and replace placeholders
+        actual_query = actual_query.gsub('$1', "'New Name'")
+
         expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
       end
     end
@@ -98,6 +111,9 @@ describe 'Query Rewriter' do
 
       @queries.each do |actual_query|
         next unless actual_query.include?('UPDATE "projects" SET "name"')
+
+        # Extract parameterized values and replace placeholders
+        actual_query = actual_query.gsub('$1', "'#{new_name}'").gsub('$2', limit.to_s)
 
         expect(format_sql(actual_query.gsub('$1',
                                             limit.to_s)).strip).to eq(format_sql(expected_query).strip)
