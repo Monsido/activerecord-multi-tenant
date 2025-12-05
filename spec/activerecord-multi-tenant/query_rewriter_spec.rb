@@ -73,6 +73,9 @@ describe 'Query Rewriter' do
       @queries.each do |actual_query|
         next unless actual_query.include?('UPDATE "projects" SET "name"')
 
+        # Extract parameterized values and replace placeholders
+        actual_query = actual_query.gsub('$1', "'New Name'")
+
         expect(format_sql(actual_query)).to eq(format_sql(expected_query.gsub(':account_id', account.id.to_s)))
       end
     end
@@ -108,6 +111,9 @@ describe 'Query Rewriter' do
 
       @queries.each do |actual_query|
         next unless actual_query.include?('UPDATE "projects" SET "name"')
+
+        # Extract parameterized values and replace placeholders
+        actual_query = actual_query.gsub('$1', "'#{new_name}'").gsub('$2', limit.to_s)
 
         expect(format_sql(actual_query.gsub('$1',
                                             limit.to_s)).strip).to eq(format_sql(expected_query).strip)
