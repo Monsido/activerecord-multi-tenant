@@ -84,6 +84,59 @@ MultiTenant.enable_write_only_mode
 
 Once you are ready to enforce tenancy, make your tenant_id column NOT NULL and simply remove that line.
 
+## Run tests
+
+This gem uses [appraisal](https://github.com/thoughtbot/appraisal) to run the test suite against multiple versions of Rails and ActiveRecord.
+To also run the test suite against multiple versions of Citus and Ruby, refer to the Github actions workflow. You can use Github actions or [act](https://github.com/nektos/act) to run it locally.
+
+1. Start postgres and citus:
+```bash
+docker-compose up -d
+```
+
+or if you want to specify the citus version:
+```bash
+CITUS_VERSION=12.1.6 docker-compose up -d
+```
+
+to see the logs:
+```bash
+docker-compose logs -f
+```
+
+2. Install dependencies for all versions of Rails and ActiveRecord:
+```bash
+bundle exec appraisal install
+```
+
+3. Run tests
+
+run test suite with all versions of Rails and ActiveRecord:
+```bash
+bundle exec appraisal rspec
+```
+
+run a specific version of Rails or ActiveRecord:
+(see `Appraisals` file for available versions)
+```bash
+bundle exec appraisal rails-7.2 rspec
+```
+
+show full backtrace on errors
+```bash
+bundle exec appraisal rails-7.2 rspec --backtrace
+```
+
+run a single spec file
+```bash
+bundle exec appraisal rails-7.2 rspec spec/activerecord-multi-tenant/query_rewriter_spec.rb
+```
+
+run a single test (example: line 42)
+```bash
+bundle exec appraisal rails-7.2 rspec spec/activerecord-multi-tenant/query_rewriter_spec.rb:42
+```
+
 ## Frequently Asked Questions
 
 * **What if I have a table that doesn't relate to my tenant?** (e.g. templates that are the same in every account)
