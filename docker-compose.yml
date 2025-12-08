@@ -1,9 +1,8 @@
-version: '2.1'
-
 services:
   master:
     container_name: "${COMPOSE_PROJECT_NAME:-citus}_master"
     image: 'citusdata/citus:${CITUS_VERSION:-11.2}'
+    platform: linux/amd64
     ports: [ '5600:5432' ]
     labels: [ 'com.citusdata.role=Master' ]
     environment:
@@ -11,6 +10,7 @@ services:
     command: -c fsync=off -c full_page_writes=off
   worker1:
     image: 'citusdata/citus:${CITUS_VERSION:-11.2}'
+    platform: linux/amd64
     ports: [ '5601:5432' ]
     labels: [ 'com.citusdata.role=Worker' ]
     depends_on: { manager: { condition: service_healthy } }
@@ -19,6 +19,7 @@ services:
     command: -c fsync=off -c full_page_writes=off
   worker2:
     image: 'citusdata/citus:${CITUS_VERSION:-11.2}'
+    platform: linux/amd64
     ports: [ '5602:5432' ]
     labels: [ 'com.citusdata.role=Worker' ]
     depends_on: { manager: { condition: service_healthy } }
@@ -28,5 +29,6 @@ services:
   manager:
     container_name: "${COMPOSE_PROJECT_NAME:-citus}_manager"
     image: 'citusdata/membership-manager:0.2.0'
+    platform: linux/amd64
     volumes: [ '/var/run/docker.sock:/var/run/docker.sock' ]
     depends_on: { master: { condition: service_healthy } }
